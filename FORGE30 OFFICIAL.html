@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FORGE30 | 30 Days. No Gym. Real Progress.</title>
+  <meta name="description" content="15-minute high-efficiency home workouts engineered for busy adults. Build consistency, shed fat, and reclaim control." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: "#0A0A0B",
+              card: "#121215",
+              cardLight: "#18181C",
+              border: "#24242B",
+              accent: "#FF3B00",
+              accentHover: "#E03400",
+              textMuted: "#8F8F9D",
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Oswald', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      background-color: #0A0A0B;
+      color: #F1F5F9;
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Oswald', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0A0A0B;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #24242B;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FF3B00;
+    }
+  </style>
+</head>
+<body class="bg-brand-black text-slate-100 antialiased selection:bg-brand-accent selection:text-white pb-20 md:pb-0">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const EBOOK_URL = "https://tahaddifit.gumroad.com/l/dadtkk";
+
+    const SOCIAL_LINKS = {
+      tiktok: "https://www.tiktok.com/@forge30d?_r=1&_t=ZS-99KUJCIDnxE",
+      youtube: "https://youtube.com/@forge30d?si=NqKfzyzDYGIJozwC",
+      instagram: "https://www.instagram.com/forge30d?igsi=dTdpeDl6Y3Q1Nxds&utm_source=qr"
+    };
+
+    const DEFAULT_WORKOUT_PLAN = Array.from({ length: 30 }, (_, i) => {
+      const day = i + 1;
+      const isRestDay = day % 7 === 0;
+
+      if (isRestDay) {
+        return {
+          day,
+          title: "Active Recovery & Mobility",
+          duration: "15 min",
+          difficulty: "Light",
+          estBurn: "40 - 70 kcal",
+          isRest: true,
+          exercises: [
+            { name: "Child's Pose Hold", sets: 2, reps: "45 sec", instructions: "Sink hips back onto heels, extend arms forward and breathe deeply." },
+            { name: "Cat-Cow Stretch", sets: 2, reps: "60 sec", instructions: "Alternate arching and rounding spine smoothly with slow respiration." },
+            { name: "World's Greatest Stretch", sets: 2, reps: "5 per side", instructions: "Lunge forward, rotate torso toward front knee, open thoracic spine." },
+          ]
+        };
+      }
+
+      const focusAreas = ["Full Body Blitz", "Upper Body & Core", "Lower Body Engine", "Core & Cardio Burn"];
+      const focus = focusAreas[i % focusAreas.length];
+
+      return {
+        day,
+        title: focus,
+        duration: "15 min",
+        difficulty: day > 15 ? "Intermediate" : "Beginner",
+        estBurn: "120 - 180 kcal",
+        isRest: false,
+        exercises: [
+          { name: "Bodyweight Squats", sets: 3, reps: "12 reps", rest: "30s", instructions: "Keep chest up, weight in heels, break parallel smoothly." },
+          { name: "Standard / Incline Push-Ups", sets: 3, reps: "8-10 reps", rest: "30s", instructions: "Maintain rigid plank line; modify on knees or elevated surface if needed." },
+          { name: "Mountain Climbers", sets: 3, reps: "20 reps", rest: "30s", instructions: "Drive knees to chest rapidly without hips bouncing." },
+          { name: "Glute Bridges", sets: 3, reps: "15 reps", rest: "30s", instructions: "Squeeze glutes top of movement, hold for 1 full second." },
+          { name: "Plank Hold", sets: 3, reps: "30 sec", rest: "45s", instructions: "Brace core tightly, pack shoulders, do not drop lower back." }
+        ]
+      };
+    });
+
+    // 1. TOP SECTION: Announcement Bar & Header
+    function TopAnnouncementBar() {
+      return (
+        <div className="bg-brand-accent text-white text-xs font-bold py-2 px-4 text-center tracking-wider uppercase flex items-center justify-center gap-2">
+          <span>🔥 LIMITED OFFER: Get the Official 30-Day FORGE30 Workout & Nutrition E-Book!</span>
+          <a 
+            href={EBOOK_URL} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="underline hover:text-slate-200 transition font-extrabold ml-1"
+          >
+            Claim Blueprint →
+          </a>
+        </div>
+      );
+    }
+
+    function Header({ onOpenOnboarding, userData }) {
+      return (
+        <header className="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border">
+          <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <a href="#" className="flex items-center gap-2 text-2xl font-display font-bold text-white tracking-tighter">
+              FORGE<span className="text-brand-accent">30</span>
+            </a>
+            <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+              <a href="#dashboard" className="hover:text-brand-accent transition">Program</a>
+              <a href="#ai-coach" className="hover:text-brand-accent transition">AI Assistant</a>
+              <a href="#ebook" className="hover:text-brand-accent transition">E-Book</a>
+              <a href="#community" className="hover:text-brand-accent transition">Community</a>
+            </nav>
+            <div className="flex items-center gap-3">
+              <a
+                href={EBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:inline-flex border border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-sm transition"
+              >
+                Get E-Book
+              </a>
+              <button
+                onClick={onOpenOnboarding}
+                className="bg-brand-accent hover:bg-brand-accentHover text-white text-xs md:text-sm font-bold uppercase tracking-wider px-5 py-2.5 rounded-sm transition shadow-md shadow-brand-accent/20"
+              >
+                {userData ? "Update Profile" : "Get Started"}
+              </button>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    // 2. HERO SECTION
+    function HeroSection({ onStart }) {
+      return (
+        <section className="relative pt-12 pb-20 md:pt-24 md:pb-32 px-4 overflow-hidden border-b border-brand-border">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div className="flex flex-col items-start z-10">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-brand-card border border-brand-border text-brand-accent text-xs font-bold uppercase tracking-widest rounded-full mb-6">
+                <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                Built For Busy Professionals & Students
+              </div>
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold leading-none tracking-tight mb-6">
+                GET FIT IN JUST <br />
+                <span className="text-brand-accent">15 MINUTES</span> A DAY
+              </h1>
+              <p className="text-slate-400 text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
+                No gym memberships. No 2-hour sessions. Pure bodyweight protocols engineered to burn fat, build lean muscle, and construct unwavering consistency.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <button
+                  onClick={onStart}
+                  className="bg-brand-accent hover:bg-brand-accentHover text-white font-bold uppercase tracking-wider px-8 py-4 text-center rounded-sm transition shadow-lg shadow-brand-accent/25"
+                >
+                  Start Your 30-Day Journey
+                </button>
+                <a
+                  href={EBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-white font-bold uppercase tracking-wider px-8 py-4 text-center rounded-sm transition bg-brand-card/50"
+                >
+                  Get Complete E-Book Blueprint
+                </a>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-brand-accent/10 rounded-xl blur-3xl"></div>
+              <div className="relative bg-brand-card border border-brand-border rounded-xl overflow-hidden p-2 shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1598971639058-fab3c3109a00?auto=format&fit=crop&w=1000&q=80" 
+                  alt="Male athlete doing push-ups at home" 
+                  className="w-full h-[420px] object-cover rounded-lg grayscale hover:grayscale-0 transition duration-700"
+                />
+                <div className="absolute bottom-6 left-6 right-6 bg-brand-black/90 backdrop-blur-md p-4 border border-brand-border rounded">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs text-brand-accent font-bold uppercase">Daily Goal</p>
+                      <p className="text-sm font-bold">15-Min High-Efficiency Circuit</p>
+                    </div>
+                    <a 
+                      href={EBOOK_URL} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs bg-brand-accent text-white px-3 py-1.5 rounded font-bold uppercase hover:bg-brand-accentHover transition"
+                    >
+                      Download E-Book
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function ProblemSolution() {
+      return (
+        <section className="py-20 bg-brand-black px-4 border-b border-brand-border">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
+            <div className="bg-brand-card/60 border border-red-950/50 p-8 rounded-xl relative overflow-hidden">
+              <span className="text-red-500 font-bold text-xs uppercase tracking-widest">The Friction</span>
+              <h2 className="text-2xl font-display font-bold text-white mt-2 mb-6">WHY MOST FITNESS ROUTINES FAIL</h2>
+              <ul className="space-y-4 text-xs sm:text-sm text-slate-400">
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold">✕</span>
+                  <span><strong>Time Starvation:</strong> 90-minute gym sessions crumble when real work and life schedules collide.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold">✕</span>
+                  <span><strong>High Expenses:</strong> Escalating subscription costs and expensive gear build unnecessary barriers.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold">✕</span>
+                  <span><strong>Overthinking & Overwhelm:</strong> Endless conflicting online workout advice paralyzes progress.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-brand-card border border-brand-accent/30 p-8 rounded-xl relative overflow-hidden shadow-lg shadow-brand-accent/5">
+              <span className="text-brand-accent font-bold text-xs uppercase tracking-widest">The FORGE30 Solution</span>
+              <h2 className="text-2xl font-display font-bold text-white mt-2 mb-6">ENGINEERED FOR REAL CONSISTENCY</h2>
+              <ul className="space-y-4 text-xs sm:text-sm text-slate-300">
+                <li className="flex items-start gap-3">
+                  <span className="text-brand-accent font-bold">✓</span>
+                  <span><strong>15-Minute Protocol:</strong> Maximum muscle recruitment in ultra-concentrated high-intensity circuits.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-brand-accent font-bold">✓</span>
+                  <span><strong>Zero Equipment Required:</strong> Execute anywhere—living room, bedroom, hotel, or office break room.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-brand-accent font-bold">✓</span>
+                  <span><strong>Clear 30-Day Matrix:</strong> Step-by-step progressive structure eliminates all guesswork.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function HowItWorks() {
+      const steps = [
+        { num: "01", title: "Set Your Baseline", desc: "Input your goals, fitness level, and target body focus into our customized setup." },
+        { num: "02", title: "Follow Daily Matrix", desc: "Unlock 15-minute tailored daily bodyweight routines designed for zero friction." },
+        { num: "03", title: "Track & Forge Ahead", desc: "Log sessions, utilize our AI fitness responder for instant advice, and lock in daily streaks." }
+      ];
+
+      return (
+        <section id="how-it-works" className="py-20 px-4 max-w-7xl mx-auto w-full">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold">HOW FORGE30 WORKS</h2>
+            <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest">Three simple steps to permanent habits</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {steps.map((s, idx) => (
+              <div key={idx} className="bg-brand-card border border-brand-border rounded-xl p-8 relative hover:border-slate-700 transition">
+                <span className="text-4xl font-display font-bold text-brand-accent/30 absolute top-4 right-4">{s.num}</span>
+                <h3 className="text-xl font-display font-bold text-white mb-3">{s.title}</h3>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function OnboardingModal({ onClose, onComplete }) {
+      const [step, setStep] = useState(1);
+      const [formData, setFormData] = useState({
+        age: '22',
+        gender: 'Male',
+        height: '180',
+        weight: '75',
+        goal: 'Build muscle & lose fat',
+        level: 'Beginner',
+        time: '15 minutes',
+        equipment: 'None',
+      });
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        onComplete(formData);
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-brand-card border border-brand-border w-full max-w-xl rounded-xl p-6 sm:p-8 relative shadow-2xl">
+            <button 
+              onClick={onClose} 
+              className="absolute top-4 right-4 text-slate-400 hover:text-white text-xl"
+            >
+              ✕
+            </button>
+
+            <div className="mb-6">
+              <span className="text-xs text-brand-accent font-bold uppercase tracking-wider">Step {step} of 2</span>
+              <h2 className="text-2xl font-bold font-display uppercase mt-1">Personalize Your Protocol</h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {step === 1 && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Age</label>
+                      <input
+                        type="number"
+                        required
+                        name="age"
+                        value={formData.age}
+                        onChange={handleChange}
+                        className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Gender</label>
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                      >
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Height (cm)</label>
+                      <input
+                        type="number"
+                        required
+                        name="height"
+                        value={formData.height}
+                        onChange={handleChange}
+                        className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Weight (kg)</label>
+                      <input
+                        type="number"
+                        required
+                        name="weight"
+                        value={formData.weight}
+                        onChange={handleChange}
+                        className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="w-full bg-brand-accent hover:bg-brand-accentHover text-white font-bold uppercase py-3.5 rounded mt-4 text-xs tracking-wider transition"
+                  >
+                    Continue
+                  </button>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <div>
+                    <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Primary Goal</label>
+                    <select
+                      name="goal"
+                      value={formData.goal}
+                      onChange={handleChange}
+                      className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                    >
+                      <option>Build muscle & lose fat</option>
+                      <option>Maximum body fat reduction</option>
+                      <option>Improve stamina & athletic performance</option>
+                      <option>Establish daily fitness consistency</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Current Level</label>
+                      <select
+                        name="level"
+                        value={formData.level}
+                        onChange={handleChange}
+                        className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                      >
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase font-bold text-slate-400 mb-1">Daily Commitment</label>
+                      <select
+                        name="time"
+                        value={formData.time}
+                        onChange={handleChange}
+                        className="w-full bg-brand-black border border-brand-border rounded p-3 text-white focus:border-brand-accent outline-none text-sm"
+                      >
+                        <option>15 minutes</option>
+                        <option>20 minutes</option>
+                        <option>30 minutes</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="w-1/3 border border-brand-border text-slate-300 font-bold uppercase py-3 rounded text-xs"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      className="w-2/3 bg-brand-accent hover:bg-brand-accentHover text-white font-bold uppercase py-3 rounded text-xs tracking-wider"
+                    >
+                      Save Profile & Load Program
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // 3. MIDDLE SECTION: Mid-Page Ebook Banner + Dashboard
+    function MidPageEbookBanner() {
+      return (
+        <div className="bg-gradient-to-r from-brand-card via-brand-cardLight to-brand-card border border-brand-accent/40 rounded-xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-brand-accent/20 border border-brand-accent flex items-center justify-center text-brand-accent font-bold text-xl shrink-0">
+              📖
+            </div>
+            <div>
+              <h3 className="text-lg font-display font-bold text-white">WANT THE OFFLINE COMPREHENSIVE MANUAL?</h3>
+              <p className="text-xs text-slate-400 mt-1">Get the complete 30-Day Blueprint with exercise technique guides, progressive scaling matrices, & high-protein meal blueprints.</p>
+            </div>
+          </div>
+          <a
+            href={EBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-brand-accent hover:bg-brand-accentHover text-white font-bold uppercase text-xs px-6 py-3.5 rounded transition tracking-wider whitespace-nowrap shadow-md shadow-brand-accent/20"
+          >
+            Download E-Book ($14.75)
+          </a>
+        </div>
+      );
+    }
+
+    function Dashboard({ userData, completedDays, plan, onSelectWorkout, onOpenOnboarding }) {
+      const completionPercentage = Math.round((completedDays.length / 30) * 100);
+
+      return (
+        <div className="space-y-8">
+          <MidPageEbookBanner />
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border pb-6">
+            <div>
+              <h2 className="text-3xl font-display font-bold">YOUR 30-DAY PROGRESS MATRIX</h2>
+              <p className="text-slate-400 text-sm">
+                {userData ? `Customized protocol tailored for: ${userData.goal}` : "Standard 15-Minute Zero-Equipment Program"}
+              </p>
+            </div>
+            <button 
+              onClick={onOpenOnboarding}
+              className="text-xs bg-brand-card hover:bg-slate-800 text-brand-accent px-4 py-2.5 rounded font-bold uppercase border border-brand-accent/30 self-start md:self-auto transition"
+            >
+              {userData ? "Edit Profile" : "Personalize Plan"}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-brand-card p-5 border border-brand-border rounded-lg">
+              <span className="text-xs font-bold text-slate-400 uppercase">Sessions Completed</span>
+              <div className="text-3xl font-display font-bold mt-1 text-white">{completedDays.length} / 30</div>
+              <div className="text-xs text-slate-500 mt-1">Days Logged</div>
+            </div>
+
+            <div className="bg-brand-card p-5 border border-brand-border rounded-lg">
+              <span className="text-xs font-bold text-slate-400 uppercase">Completion Rate</span>
+              <div className="text-3xl font-display font-bold mt-1 text-brand-accent">{completionPercentage}%</div>
+              <div className="w-full bg-brand-black h-1.5 rounded-full mt-2 overflow-hidden">
+                <div className="bg-brand-accent h-full transition-all duration-500" style={{ width: `${completionPercentage}%` }}></div>
+              </div>
+            </div>
+
+            <div className="bg-brand-card p-5 border border-brand-border rounded-lg">
+              <span className="text-xs font-bold text-slate-400 uppercase">Current Streak</span>
+              <div className="text-3xl font-display font-bold mt-1 text-white">
+                {completedDays.length > 0 ? `${completedDays.length} Days` : "0 Days"}
+              </div>
+              <div className="text-xs text-emerald-400 mt-1 font-semibold">Keep Building</div>
+            </div>
+
+            <div className="bg-brand-card p-5 border border-brand-border rounded-lg">
+              <span className="text-xs font-bold text-slate-400 uppercase">Total Time Invested</span>
+              <div className="text-3xl font-display font-bold mt-1 text-white">
+                {completedDays.length * 15} <span className="text-sm font-sans font-normal text-slate-400">mins</span>
+              </div>
+              <div className="text-xs text-slate-500 mt-1">Pure Focus</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {plan.map((item) => {
+              const isDone = completedDays.includes(item.day);
+              return (
+                <div 
+                  key={item.day}
+                  className={`bg-brand-card border ${isDone ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-brand-border'} p-5 rounded-lg flex flex-col justify-between hover:border-slate-600 transition`}
+                >
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs font-bold text-brand-accent uppercase tracking-wider">Day {item.day}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold border ${
+                        item.isRest ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-brand-black text-slate-400 border-brand-border'
+                      }`}>
+                        {item.isRest ? 'Rest' : item.difficulty}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold font-display tracking-tight text-white mb-2">{item.title}</h3>
+                    <div className="flex items-center gap-4 text-xs text-slate-400 mb-4">
+                      <span>⏱ {item.duration}</span>
+                      <span>🔥 ~{item.estBurn}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-brand-border/60 pt-4 mt-2">
+                    {isDone ? (
+                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                        ✓ Completed
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-500">
+                        {item.exercises.length} Exercises
+                      </span>
+                    )}
+                    
+                    <button
+                      onClick={() => onSelectWorkout(item)}
+                      className={`px-3.5 py-1.5 rounded text-xs font-bold uppercase transition ${
+                        isDone 
+                          ? 'bg-brand-border text-slate-300 hover:bg-slate-700' 
+                          : 'bg-brand-accent text-white hover:bg-brand-accentHover shadow-sm shadow-brand-accent/20'
+                      }`}
+                    >
+                      {isDone ? 'Review' : 'Start Session'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    function WorkoutPlayer({ workout, onClose, onComplete }) {
+      const [seconds, setSeconds] = useState(0);
+      const [isActive, setIsActive] = useState(false);
+
+      useEffect(() => {
+        let interval = null;
+        if (isActive) {
+          interval = setInterval(() => {
+            setSeconds((prev) => prev + 1);
+          }, 1000);
+        } else if (!isActive && seconds !== 0) {
+          clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+      }, [isActive, seconds]);
+
+      const formatTime = (totalSec) => {
+        const mins = Math.floor(totalSec / 60);
+        const secs = totalSec % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-brand-black/95 backdrop-blur-md flex flex-col justify-between p-4 sm:p-8 overflow-y-auto">
+          <div className="flex justify-between items-center border-b border-brand-border pb-4 max-w-4xl mx-auto w-full">
+            <div>
+              <span className="text-xs text-brand-accent font-bold uppercase">Day {workout.day} Guided Session</span>
+              <h2 className="text-xl sm:text-2xl font-bold font-display">{workout.title}</h2>
+            </div>
+            <button onClick={onClose} className="text-slate-400 hover:text-white text-2xl font-bold">✕</button>
+          </div>
+
+          <div className="max-w-3xl mx-auto w-full py-8 space-y-8">
+            <div className="bg-brand-card border border-brand-border rounded-xl p-6 text-center shadow-2xl">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Elapsed Session Time</span>
+              <div className="text-5xl sm:text-6xl font-display font-bold text-brand-accent my-2 tracking-wider">
+                {formatTime(seconds)}
+              </div>
+              <div className="flex justify-center gap-4 mt-4">
+                <button
+                  onClick={() => setIsActive(!isActive)}
+                  className={`px-6 py-2.5 rounded font-bold uppercase text-xs ${
+                    isActive ? 'bg-amber-600 hover:bg-amber-700' : 'bg-brand-accent hover:bg-brand-accentHover'
+                  } text-white transition`}
+                >
+                  {isActive ? 'Pause Timer' : 'Start Timer'}
+                </button>
+                <button
+                  onClick={() => { setIsActive(false); setSeconds(0); }}
+                  className="px-4 py-2.5 border border-brand-border text-slate-400 hover:text-white rounded font-bold uppercase text-xs transition"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold uppercase font-display text-slate-300">Exercise Circuit Protocol</h3>
+              {workout.exercises.map((ex, idx) => (
+                <div key={idx} className="bg-brand-card border border-brand-border rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-700 transition">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-brand-accent">0{idx + 1}</span>
+                      <h4 className="font-bold text-white text-base">{ex.name}</h4>
+                    </div>
+                    <p className="text-slate-400 text-xs mt-1">{ex.instructions}</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs bg-brand-black px-3 py-2 rounded border border-brand-border self-end sm:self-auto shrink-0">
+                    <span className="text-slate-300 font-bold">{ex.sets} Sets</span>
+                    <span className="text-slate-600">|</span>
+                    <span className="text-brand-accent font-bold">{ex.reps}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-brand-border pt-4 max-w-3xl mx-auto w-full flex justify-end">
+            <button
+              onClick={onComplete}
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase tracking-wider px-8 py-4 rounded-sm transition text-center shadow-lg shadow-emerald-950"
+            >
+              Mark Day {workout.day} Complete
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // UPGRADED FEATURED AI ASSISTANT: Comprehensive Fitness Knowledge Base
+    function AIAssistant() {
+      const [messages, setMessages] = useState([
+        { 
+          role: 'system', 
+          text: '🔥 Welcome to FORGE30 Universal AI Fitness Coach! Ask me ANYTHING regarding training techniques, fat loss, hypertrophy, high-protein nutrition, recovery, warm-ups, or custom exercise modifications. How can I assist your goals today?' 
+        }
+      ]);
+      const [input, setInput] = useState('');
+      const [isTyping, setIsTyping] = useState(false);
+      const chatEndRef = useRef(null);
+
+      const quickPrompts = [
+        "How do I lose fat without losing muscle?",
+        "How can I scale push-ups if I'm a total beginner?",
+        "What are the best high-protein meals for busy schedules?",
+        "How do I break a workout plateau with bodyweight training?",
+        "Should I train if I am experiencing muscle soreness?"
+      ];
+
+      const scrollToBottom = () => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      };
+
+      useEffect(() => {
+        scrollToBottom();
+      }, [messages, isTyping]);
+
+      const generateResponse = (q) => {
+        const lower = q.toLowerCase();
+
+        // Fat Loss & Calories
+        if (lower.includes('fat') || lower.includes('weight loss') || lower.includes('burn calorie') || lower.includes('deficit')) {
+          return "🔥 FAT LOSS PROTOCOL:\n1. Caloric Deficit: Consume 300-500 kcal below your total daily energy expenditure (TDEE).\n2. Protein Intake: Maintain 1.6g - 2.2g of protein per kg of bodyweight to preserve muscle mass.\n3. High-Intensity Circuits: Execute 15-minute high-density workouts (like FORGE30) to boost post-exercise oxygen consumption (EPOC).\n4. Hydration: Drink 3-4 liters of water daily to maintain metabolic efficiency.";
+        }
+
+        // Muscle Building & Hypertrophy
+        if (lower.includes('muscle') || lower.includes('hypertrophy') || lower.includes('build') || lower.includes('mass') || lower.includes('bulk')) {
+          return "💪 HYPERTROPHY & MUSCLE BUILDING:\n1. Mechanical Tension: Focus on slow, controlled eccentric (lowering) phases (3-4 seconds per rep).\n2. Progressive Overload: Increase reps, decrease rest periods, or elevate leverage difficulty weekly.\n3. Proximity to Failure: Ensure your sets finish within 1-2 reps of technical failure.\n4. Caloric Surplus / Maintenance: Consume sufficient protein (minimum 1.8g/kg) and stay at or slightly above baseline calories.";
+        }
+
+        // Push-Ups & Scaling
+        if (lower.includes('pushup') || lower.includes('push-up') || lower.includes('chest') || lower.includes('tricep')) {
+          return "🎯 PUSH-UP MASTERCLASS:\n• Beginner Regression: Wall Push-ups ➔ Incline Push-ups (hands on bench/desk) ➔ Knee Push-ups.\n• Advanced Progression: Decline Push-ups (feet elevated) ➔ Diamond Push-ups ➔ Archer Push-ups.\n• Form Cues: Pack shoulders down, brace core tight, and flare elbows no more than 45 degrees relative to your torso.";
+        }
+
+        // Squats & Knee Care
+        if (lower.includes('squat') || lower.includes('knee') || lower.includes('leg') || lower.includes('quad') || lower.includes('glute')) {
+          return "🦵 LOWER BODY ENGINE & KNEE PRESERVATION:\n• Proper Squat Mechanics: Sit back into your hips, keep weight distributed through heels/midfoot, and drive knees outward inline with toes.\n• Knee Pain Relief: If knees hurt, substitute with Glute Bridges, Reverse Lunges, or Bulgarian Split Squats with a forward torso lean.\n• Progressive Load: Pause for 2 seconds at the bottom of bodyweight squats to multiply glute and quad tension.";
+        }
+
+        // Core, Abs, & Planks
+        if (lower.includes('abs') || lower.includes('core') || lower.includes('plank') || lower.includes('belly')) {
+          return "🛡 CORE STABILITY & VISIBLE ABS:\n1. Abs are revealed in the kitchen through systematic fat loss.\n2. For structural core strength: Maintain pelvic tilt during planks (squeeze glutes, tuck belly button to spine).\n3. Effective Exercises: Plank holds, Hollow body holds, Mountain climbers, and Deadbugs.";
+        }
+
+        // Nutrition, Diet, & Protein
+        if (lower.includes('diet') || lower.includes('protein') || lower.includes('eat') || lower.includes('food') || lower.includes('meal') || lower.includes('nutrition')) {
+          return "🥗 HIGH-EFFICIENCY NUTRITION PRINCIPLES:\n• Lean Proteins: Chicken breast, eggs/egg whites, Greek yogurt, canned tuna, tofu, and whey protein isolate.\n• Complex Carbs: Oats, sweet potatoes, brown rice, and quinoa for sustained workout energy.\n• Healthy Fats: Avocados, almonds, olive oil, and chia seeds for hormonal balance.\n👉 Pro Tip: For complete meal prep templates & cheat sheets, check out the FORGE30 E-Book!";
+        }
+
+        // Soreness, Pain, & Rest
+        if (lower.includes('sore') || lower.includes('pain') || lower.includes('rest') || lower.includes('recover') || lower.includes('sleep')) {
+          return "💤 RECOVERY & SORENESS STRATEGY:\n• DOMS (Delayed Onset Muscle Soreness): Normal when starting new stimuli. Light 15-minute active recovery or mobility stretches will promote blood flow and speed recovery.\n• Sharp/Joint Pain: STOP immediately. Joint pain indicates structural stress, not muscular adaptation.\n• Sleep Requirement: Target 7-9 hours of continuous sleep for human growth hormone (HGH) release and neural repair.";
+        }
+
+        // Motivation, Time Management, & Consistency
+        if (lower.includes('time') || lower.includes('busy') || lower.includes('schedule') || lower.includes('motivat') || lower.includes('consistency') || lower.includes('habit')) {
+          return "⏱ ZERO-FRICTION CONSISTENCY:\n• 15 minutes is only 1% of your entire 24-hour day.\n• Set a non-negotiable anchor time: Execute your session right after waking up or immediately upon returning home.\n• Never miss two days in a row: Maintaining momentum is easier than rebuilding momentum.";
+        }
+
+        // Plateau & Stagnation
+        if (lower.includes('plateau') || lower.includes('stuck') || lower.includes('progress') || lower.includes('scale')) {
+          return "⚡ BREAKING PROGRESS PLATEAUS:\n1. Alter Tempo: Use 4-second negative eccentric lowering reps.\n2. Reduce Rest Intervals: Drop rest times from 45 seconds to 20 seconds.\n3. Increase Density: Complete more rounds within the standard 15-minute window.\n4. Deload Week: Take 3-4 days of light mobility to let your central nervous system (CNS) reset.";
+        }
+
+        // Supplements
+        if (lower.includes('supplement') || lower.includes('creatine') || lower.includes('whey') || lower.includes('preworkout') || lower.includes('vitamin')) {
+          return "💊 EVIDENCE-BASED SUPPLEMENTATION:\n1. Creatine Monohydrate: 3-5g daily for power output and cell hydration.\n2. Whey/Plant Protein: Convenient way to hit daily protein targets.\n3. Vitamin D3 & Omega-3: Supports joint recovery, immune function, and test levels.\nNote: Supplements are 5% of your result—training intensity and solid nutrition make up the remaining 95%.";
+        }
+
+        // Default Intelligent Fallback
+        return "🏋️ FORGE30 COACH RESPONSE:\nTo maximize your results: prioritize high movement quality, stay consistent with your 15-minute daily window, and ensure you consume adequate protein.\n\nFor custom step-by-step guidance, ask me about:\n- Fat loss vs Muscle gain\n- Exercise modifications (push-ups, squats, planks)\n- Nutrition & high-protein meal prep\n- Overcoming soreness & fatigue";
+      };
+
+      const handleSend = (e, textToSend) => {
+        if (e) e.preventDefault();
+        const query = textToSend || input;
+        if (!query.trim()) return;
+
+        setMessages((prev) => [...prev, { role: 'user', text: query }]);
+        if (!textToSend) setInput('');
+        setIsTyping(true);
+
+        setTimeout(() => {
+          const reply = generateResponse(query);
+          setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
+          setIsTyping(false);
+        }, 600);
+      };
+
+      return (
+        <div className="space-y-4">
+          <div className="text-center max-w-xl mx-auto mb-6">
+            <span className="text-xs text-brand-accent font-bold uppercase tracking-widest">24/7 Universal Smart Fitness Coach</span>
+            <h2 className="text-3xl font-display font-bold text-white mt-1">FORGE30 AI COACH RESPONDER</h2>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1">Ask any fitness question—from bodyweight mechanics to nutrition and fat loss.</p>
+          </div>
+
+          {/* Quick Prompt Suggestions */}
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            {quickPrompts.map((prompt, i) => (
+              <button
+                key={i}
+                onClick={() => handleSend(null, prompt)}
+                className="text-[11px] bg-brand-black hover:bg-brand-card border border-brand-border text-slate-300 hover:text-brand-accent px-3 py-1.5 rounded-full transition"
+              >
+                💡 {prompt}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-brand-black border border-brand-border rounded-xl p-4 h-96 overflow-y-auto space-y-4 shadow-inner">
+            {messages.map((m, idx) => (
+              <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[88%] rounded border p-3.5 text-xs sm:text-sm leading-relaxed whitespace-pre-line ${
+                  m.role === 'user' 
+                    ? 'bg-brand-accent/20 border-brand-accent/40 text-slate-100 font-medium' 
+                    : 'bg-brand-card border-brand-border text-slate-300'
+                }`}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-brand-card border border-brand-border text-slate-400 text-xs rounded p-3 italic">
+                  FORGE30 AI Coach is formulating your fitness blueprint...
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          <form onSubmit={(e) => handleSend(e, null)} className="flex gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask any fitness question (fat loss, push-ups, soreness, protein)..."
+              className="flex-grow bg-brand-black border border-brand-border rounded px-4 py-3 text-xs sm:text-sm text-white focus:border-brand-accent outline-none"
+            />
+            <button 
+              type="submit" 
+              className="bg-brand-accent hover:bg-brand-accentHover text-white font-bold uppercase text-xs px-6 py-3 rounded transition tracking-wider shrink-0"
+            >
+              Ask AI
+            </button>
+          </form>
+
+          <div className="text-[10px] text-slate-500 text-center uppercase tracking-wider">
+            Disclaimer: FORGE30 AI offers generalized training strategies and is not a substitute for formal medical evaluation.
+          </div>
+        </div>
+      );
+    }
+
+    // MAIN E-BOOK SECTION
+    function EbookSection() {
+      return (
+        <div className="max-w-7xl mx-auto bg-brand-card border border-brand-border rounded-2xl p-6 sm:p-12 relative overflow-hidden shadow-2xl">
+          <div className="grid lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Left Content Column */}
+            <div className="lg:col-span-6 space-y-6">
+              <span className="text-brand-accent text-xs font-bold uppercase tracking-widest bg-brand-black/60 border border-brand-border px-3 py-1 rounded-full">
+                Official Blueprint & Training Matrix
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-display font-bold text-white leading-tight">
+                TOO BUSY FOR THE GYM? <br />
+                <span className="text-brand-accent">THE FORGE30 E-BOOK</span>
+              </h2>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                Take the entire 30-day protocol anywhere offline. Complete exercise visual breakdowns, progressive overload adjustments, simple zero-stress nutritional tactics, and mental discipline principles in one compact digital guide.
+              </p>
+              
+              <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
+                <li className="flex items-center gap-2.5">
+                  <span className="text-brand-accent font-bold text-base">✓</span> Full 30-Day Zero-Gym Blueprint
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-brand-accent font-bold text-base">✓</span> Form Modifications for All Fitness Levels
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-brand-accent font-bold text-base">✓</span> Practical High-Protein Meal Cheat Sheet
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="text-brand-accent font-bold text-base">✓</span> Lifetime Instant Digital Access
+                </li>
+              </ul>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4 border-t border-brand-border">
+                <a
+                  href={EBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-brand-accent hover:bg-brand-accentHover text-white font-bold uppercase tracking-wider px-8 py-4 rounded-sm transition text-xs text-center shadow-lg shadow-brand-accent/20 w-full sm:w-auto"
+                >
+                  Download Complete E-Book — $14.75
+                </a>
+                <span className="text-xs text-slate-500 uppercase tracking-wider">Instant PDF Delivery</span>
+              </div>
+            </div>
+
+            {/* Right Media Column */}
+            <div className="lg:col-span-6 flex flex-col sm:flex-row gap-4 items-center justify-center">
+              
+              {/* Male Athlete Push-Up Photo */}
+              <div className="w-full sm:w-1/2 relative group">
+                <div className="absolute inset-0 bg-brand-accent/10 rounded-lg blur-lg group-hover:bg-brand-accent/20 transition"></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1598971639058-fab3c3109a00?auto=format&fit=crop&w=800&q=80" 
+                  alt="Male Athlete Doing Push-ups at Home" 
+                  className="relative w-full h-72 sm:h-80 object-cover rounded-lg border border-brand-border shadow-xl grayscale group-hover:grayscale-0 transition duration-500"
+                />
+                <span className="absolute bottom-3 left-3 bg-brand-black/80 text-[10px] font-bold text-slate-300 px-2 py-1 rounded border border-brand-border">
+                  Home Push-Up Protocol
+                </span>
+              </div>
+
+              {/* E-Book Cover Image linking to Gumroad */}
+              <div className="w-full sm:w-1/2 flex justify-center">
+                <a 
+                  href={EBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative group transition transform hover:-translate-y-1 block w-full max-w-[240px]"
+                >
+                  <div className="absolute inset-0 bg-brand-accent/20 rounded-lg blur-xl group-hover:bg-brand-accent/40 transition"></div>
+                  <img 
+                    src="FORGE30_cover_800x800.jpg" 
+                    alt="Too Busy To Make It To The Gym - 30-Day Home Workout Program" 
+                    className="relative w-full h-72 sm:h-80 rounded-lg border border-brand-border shadow-2xl object-cover"
+                  />
+                  <div className="absolute top-3 right-3 bg-brand-accent text-white font-bold text-[10px] px-2 py-1 rounded uppercase tracking-widest shadow">
+                    E-Book
+                  </div>
+                </a>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    function SocialSection() {
+      const socialCards = [
+        { 
+          platform: "TikTok", 
+          handle: "@forge30d", 
+          link: SOCIAL_LINKS.tiktok, 
+          desc: "Quick 15-second exercise form cues, routine breakdowns & daily motivation snippets." 
+        },
+        { 
+          platform: "YouTube", 
+          handle: "@forge30d", 
+          link: SOCIAL_LINKS.youtube, 
+          desc: "Full workout follow-alongs, exercise technique tutorials, & consistency breakdowns." 
+        },
+        { 
+          platform: "Instagram", 
+          handle: "@forge30d", 
+          link: SOCIAL_LINKS.instagram, 
+          desc: "Daily workout visual infographics, community highlights & habit strategies." 
+        }
+      ];
+
+      return (
+        <section id="community" className="py-20 px-4 bg-brand-black border-t border-brand-border">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-xl mx-auto mb-14">
+              <span className="text-xs text-brand-accent font-bold uppercase tracking-widest">Join The Movement</span>
+              <h2 className="text-3xl sm:text-4xl font-display font-bold mt-1">15 MINUTES. EVERY SINGLE DAY.</h2>
+              <p className="text-slate-400 text-xs sm:text-sm mt-2">Connect with our community on social platforms for tactical advice and daily push.</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              {socialCards.map((card, i) => (
+                <a 
+                  key={i} 
+                  href={card.link}
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="bg-brand-card border border-brand-border rounded-xl p-6 hover:border-brand-accent transition group flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs font-bold text-brand-accent uppercase tracking-widest">{card.platform}</span>
+                      <span className="text-xs text-slate-500 font-medium">{card.handle}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white group-hover:text-brand-accent transition">{card.platform} Official Feed</h3>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed">{card.desc}</p>
+                  </div>
+                  <p className="text-xs font-bold text-slate-300 group-hover:text-brand-accent mt-6 flex items-center gap-1 transition">
+                    Visit {card.platform} Channel →
+                  </p>
+                </a>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-8 text-xs text-slate-400 font-bold uppercase tracking-wider border-t border-brand-border/60 pt-8">
+              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" className="hover:text-brand-accent transition flex items-center gap-1">
+                TikTok: @forge30d
+              </a>
+              <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" className="hover:text-brand-accent transition flex items-center gap-1">
+                YouTube: @forge30d
+              </a>
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" className="hover:text-brand-accent transition flex items-center gap-1">
+                Instagram: @forge30d
+              </a>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // 4. BOTTOM SECTION: Footer & Sticky Mobile E-Book CTA Bar
+    function StickyBottomEbookBar() {
+      return (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-brand-card/95 backdrop-blur-md border-t border-brand-accent/50 p-3 flex items-center justify-between px-4 max-w-7xl mx-auto rounded-t-xl shadow-2xl">
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline text-xl">📕</span>
+            <div>
+              <p className="text-xs font-bold text-white uppercase tracking-wider">The FORGE30 E-Book</p>
+              <p className="text-[10px] text-slate-400">Complete 30-day offline manual & nutritional matrix</p>
+            </div>
+          </div>
+          <a
+            href={EBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-brand-accent hover:bg-brand-accentHover text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded transition shadow-md shadow-brand-accent/30 whitespace-nowrap"
+          >
+            Get E-Book ($14.75)
+          </a>
+        </div>
+      );
+    }
+
+    function Footer() {
+      return (
+        <footer className="bg-brand-black border-t border-brand-border py-12 px-4 mb-12 md:mb-0">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex flex-col items-center md:items-start gap-1">
+              <div className="flex items-center gap-2 text-xl font-display font-bold text-white">
+                FORGE<span className="text-brand-accent">30</span>
+              </div>
+              <a href={EBOOK_URL} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-accent hover:underline font-bold">
+                Download Official E-Book Guide →
+              </a>
+            </div>
+            <p className="text-xs text-slate-500 text-center md:text-left">
+              © {new Date().getFullYear()} FORGE30. Built for maximum efficiency and real home progression.
+            </p>
+            <div className="flex gap-6 text-xs text-slate-400">
+              <a href={EBOOK_URL} target="_blank" rel="noopener noreferrer" className="hover:text-brand-accent transition font-bold">E-Book Link</a>
+              <a href={SOCIAL_LINKS.tiktok} target="_blank" rel="noreferrer" className="hover:text-white transition">TikTok</a>
+              <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noreferrer" className="hover:text-white transition">YouTube</a>
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noreferrer" className="hover:text-white transition">Instagram</a>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    function App() {
+      const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+      const [userData, setUserData] = useState(() => {
+        const saved = localStorage.getItem('forge30_user');
+        return saved ? JSON.parse(saved) : null;
+      });
+
+      const [completedDays, setCompletedDays] = useState(() => {
+        const saved = localStorage.getItem('forge30_progress');
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      const [activeWorkout, setActiveWorkout] = useState(null);
+
+      useEffect(() => {
+        if (userData) {
+          localStorage.setItem('forge30_user', JSON.stringify(userData));
+        }
+      }, [userData]);
+
+      useEffect(() => {
+        localStorage.setItem('forge30_progress', JSON.stringify(completedDays));
+      }, [completedDays]);
+
+      const handleCompleteWorkout = (dayNumber) => {
+        if (!completedDays.includes(dayNumber)) {
+          setCompletedDays([...completedDays, dayNumber]);
+        }
+        setActiveWorkout(null);
+      };
+
+      const handleOnboardingComplete = (formData) => {
+        setUserData(formData);
+        setIsOnboardingOpen(false);
+        document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' });
+      };
+
+      return (
+        <div className="min-h-screen bg-brand-black text-slate-100 flex flex-col font-sans">
+          <TopAnnouncementBar />
+          <Header onOpenOnboarding={() => setIsOnboardingOpen(true)} userData={userData} />
+          
+          <main className="flex-grow">
+            <HeroSection onStart={() => setIsOnboardingOpen(true)} />
+            <ProblemSolution />
+            <HowItWorks />
+            
+            <section id="dashboard" className="py-16 px-4 max-w-7xl mx-auto w-full">
+              <Dashboard 
+                userData={userData} 
+                completedDays={completedDays}
+                plan={DEFAULT_WORKOUT_PLAN}
+                onSelectWorkout={(day) => setActiveWorkout(day)}
+                onOpenOnboarding={() => setIsOnboardingOpen(true)}
+              />
+            </section>
+
+            <section id="ai-coach" className="py-16 bg-brand-card/70 border-y border-brand-border px-4">
+              <div className="max-w-4xl mx-auto">
+                <AIAssistant />
+              </div>
+            </section>
+
+            <section id="ebook" className="py-20 px-4">
+              <EbookSection />
+            </section>
+
+            <SocialSection />
+          </main>
+
+          {isOnboardingOpen && (
+            <OnboardingModal 
+              onClose={() => setIsOnboardingOpen(false)} 
+              onComplete={handleOnboardingComplete} 
+            />
+          )}
+
+          {activeWorkout && (
+            <WorkoutPlayer 
+              workout={activeWorkout} 
+              onClose={() => setActiveWorkout(null)}
+              onComplete={() => handleCompleteWorkout(activeWorkout.day)}
+            />
+          )}
+
+          <Footer />
+          <StickyBottomEbookBar />
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
